@@ -1,5 +1,5 @@
 import ase.io
-a = ase.io.read(r"test.xyz",format = "xyz")
+molecule = ase.io.read(r"C:\Users\Isaac\Documents\python\working_example\clean_XYZs\d123456.xyz",format = "xyz")
 
-print(a)
+
 
