@@ -182,6 +182,21 @@ def color(color_name, alpha=1.0):
         f'{alpha})\n') + _cmds
 
 
+def colour_sphere(colour_name, radius):
+    global _cmds
+    _cmds = (f'color("{colour_name}") sphere({radius},$fn=31);') + _cmds
+
+
+def colour_cylinder(colour_name, diameter, height):
+    global _cmds
+    radius = diameter / 2
+    _cmds = (f'color("{colour_name}") cylinder(h={height},r1={radius},r2={radius},$fn=31);') + _cmds
+
+#def difference_sphere(sphere_rad,c_size,c_translate):
+#    global _cmds
+#    _cmds = ("difference()\{")
+#c_size is the cube size to subtract by
+#c_translate is the coordinates that the cube is translated by
 def rgb(r, g, b, alpha=1.0):
     global _cmds
     _cmds = (f"color([{r/255},{g/255},"
