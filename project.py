@@ -1,5 +1,4 @@
-import solid
-
+from solid import *
 import openscad as o
 import ase.build
 from ase.neighborlist import neighbor_list
@@ -82,7 +81,7 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 o.output(o.result())
 #model = import_scad("C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad")
 
-subprocess.run(["C:\\Program Files\\OpenSCAD\\openscad.exe", "-o", "C:\\Users\\Isaac\\Documents\\python\\working_example\\exported models\\multicolourdatabasemol.3mf", "project.scad"])
+subprocess.run(["/usr/bin/openscad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/project.3mf", "project.scad"])
 #os.chdir("C:\\Users\\Isaac\\Documents\\python\\working_example\\colorscad-0.5.2")
 #subprocess.call([".\\colorscad.sh", "-i", "C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad",
 #                 "-o", "C:\\Users\\Isaac\\Documents\\python\\working_example\\exported models\\colortest.3mf"], shell=True)
