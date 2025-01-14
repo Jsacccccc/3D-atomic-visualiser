@@ -94,8 +94,6 @@ for place_main,x in enumerate(b):
     y_tot.append(y_value)
     z_tot.append(z_value)
 
-
-
 count = 0
 positive = 0
 negative = 0
@@ -103,10 +101,12 @@ total = 0
 place_sub = 0
 for count,x in enumerate(atom_index):
     positive = sphere(4.5*size_multiplier[count]*scale, segments=50)
-    for place_sub,y in enumerate(atom_index[count]):
+    for y in atom_index[count]:
+        print(y)
         negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(cylinder(r=2,h=5,segments=50))
         negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20,-20,0.8*4.5*size_multiplier[count]*scale])(cube(40)))
         positive = positive - negative
+        place_sub += 1
     total = total + translate([x_tot[count],y_tot[count],z_tot[count]])(positive)
 
 scad_render_to_file(total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/total.scad')
