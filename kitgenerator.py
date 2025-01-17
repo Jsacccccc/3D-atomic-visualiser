@@ -74,6 +74,7 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 print(i_total)
 print(j_total)
 
+
 atom_index = []
 x_tot = []
 y_tot = []
@@ -93,51 +94,49 @@ for place_main,x in enumerate(b):
     x_tot.append(x_value)
     y_tot.append(y_value)
     z_tot.append(z_value)
-
 count = 0
 positive = 0
 negative = 0
-total = 0
+atom_total = 0
 place_sub = 0
+mini_count = 0
+# this is the loop that prints the spheres for the kit
+# this first loop runs for every atom in the structure
 for count,x in enumerate(atom_index):
     positive = sphere(4.5*size_multiplier[count]*scale, segments=50)
+    negative = 0
+# this second loop runs for every bond connection for every atom in the structure, so place_sub is needed to keep track
     for y in atom_index[count]:
-        print(y)
-        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(cylinder(r=2,h=5,segments=50))
+# 'negative' is the material being removed from each atom where 'positive' is the atom itself
+        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(cylinder(r=2,h=10,segments=50))
         negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20,-20,0.8*4.5*size_multiplier[count]*scale])(cube(40)))
         positive = positive - negative
         place_sub += 1
-    total = total + translate([x_tot[count],y_tot[count],z_tot[count]])(positive)
+    atom_total = atom_total + translate([x_tot[count],y_tot[count],z_tot[count]])(positive)
 
-scad_render_to_file(total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/total.scad')
+scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print.scad')
 
+for i in range(0,place_sub):
+    x_value = (1 + (place_main // 6)) * 15 * scale
+    y_value = (place_main % 6) * 15 * scale
+    z_value = 4.5 * size_multiplier[place_main] * scale
+    x_tot.append(x_value)
+    y_tot.append(y_value)
+    z_tot.append(z_value)
 
-#counter = 0;
-#atomlist = np.arange(5*len(u)).reshape(len(u),3)
-#atomlist = []
-#for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
-#   print(i_, j_, d_, D_, u_)
-#   o.cylinder((5 * scale), d_ * 10 * (1.2 * scale))
-#   o.colour_cylinder("grey", (5 * scale), (d_ * 10 * (1.2 * scale)))
-#    z_rot()
-#    y_rot()
-#   o.rotate(0, y_rot.angle, z_rot.angle)
-#   o.translate(*b[i_]*scale)
-#    counter = + 1
-#    atomlist = np.append(atomlist,[i_,j_,d_,z_rot.angle,y_rot.angle], axis=(counter-1))
-
-#check = []
-#counter = 0
-#for i in range(len(u)):
-#
-#    o.difference(
-#        if check[]
-#        o.sphere()
-#    )
-#    counter += 1
+counter = 0
+bond_total = 0
+for d_ in zip(d):
+    print(np.float64(d_)*12)
+    bond = 0
+    bond_num = 0
+    bond = rotate([0,90,0])(cylinder(r = (2.5),h = ((np.float64(d_)[0]*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]) * scale)), segments = 50))
+    bond += rotate([0,90,0])(translate([0,0,-2])(cylinder(r = 1.95,h = 4 + ((np.float64(d_)[0]*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]) * scale)),segments = 50)))
+    bond_total += translate([x_tot[counter],y_tot[counter],z_tot[counter]])(bond)
+    counter += 1
 
 
 
-#print(atomlist)
-#print(len(u))
-#o.output(o.result())
+scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print.scad' )
+#bond_num = rotate([0, 0, 0])(linear_extrude(15)(translate([0, 0, 0])(text(, size = 10))))
+#scad_render_to_file(bond_num,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_num_test.scad' )

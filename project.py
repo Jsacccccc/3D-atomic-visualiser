@@ -28,7 +28,7 @@ def bulkgen():
 #   si.write("C:\\Users\\Isaac\\Documents\\Si.xyz")
     return a
 
-a = databasemolecule()
+a = bulkgen()
 b = a.get_positions()
 species_uniq = np.unique(a.get_chemical_symbols())
 species = a.get_chemical_symbols()
@@ -43,9 +43,8 @@ b *= 10*scale
 count = 0
 for x in b:
     o.colour_sphere("red",(4.5*size_multiplier[count]*scale))
-#    o.color("Red")
-#    o.sphere(9*size_multiplier[count]*scale)
     count += 1
+# the * before x means it is iterative and uses the x,y and z coordinates in x iteratively
     o.translate(*x*scale)
     print(x)
 
@@ -76,7 +75,7 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
         z_rot()
         y_rot()
         o.rotate(0, y_rot.angle, z_rot.angle)
-        o.translate(*b[i_]*scale)
+        o.translate(*b[i_])
 
 o.output(o.result())
 #model = import_scad("C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad")
