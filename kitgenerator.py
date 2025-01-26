@@ -10,10 +10,11 @@ from properties import atom_size
 import subprocess
 import copy
 
+
 # a contains the structure and b contains the positions of atoms in the structure
 a = []
 b = []
-scale = 1.0
+scale = 1.5
 
 
 #these three definitions define the source used to generate structures.
@@ -38,7 +39,7 @@ species_uniq = np.unique(a.get_chemical_symbols())
 # species makes a tuple of the species of every atom in the structure
 species = a.get_chemical_symbols()
 cutoffs = {(str(s1), str(s2)): (bond_radii[s1] + bond_radii[s2]) * 1.1 for s1 in species_uniq for s2 in species_uniq}
-size_multiplier = [((atom_size[atom]/31)*0.6*scale) for atom in species]
+size_multiplier = [((atom_size[atom]/31)*0.6) for atom in species]
 
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
 b *= 10*scale
@@ -88,7 +89,7 @@ for place_main,x in enumerate(b):
         fresh.append(j_total[place_sub])
         place_sub += 1
     atom_index.append(fresh)
-    x_value = (1 + (place_main // 6)) * 15 * scale
+    x_value = ((place_main // 6)) * 15 * scale
     y_value = (place_main % 6) * 15 * scale
     z_value = 4.5 * size_multiplier[place_main] * scale
     x_tot.append(x_value)
@@ -100,43 +101,54 @@ negative = 0
 atom_total = 0
 place_sub = 0
 mini_count = 0
+size_total = []
 # this is the loop that prints the spheres for the kit
 # this first loop runs for every atom in the structure
 for count,x in enumerate(atom_index):
-    positive = sphere(4.5*size_multiplier[count]*scale, segments=50)
+    sphere_size = 4.5*size_multiplier[count]*scale
+    size_total.append(sphere_size)
+    positive = sphere(sphere_size, segments=50)
     negative = 0
 # this second loop runs for every bond connection for every atom in the structure, so place_sub is needed to keep track
     for y in atom_index[count]:
 # 'negative' is the material being removed from each atom where 'positive' is the atom itself
-        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(cylinder(r=2,h=10,segments=50))
-        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20,-20,0.8*4.5*size_multiplier[count]*scale])(cube(40)))
+        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(cylinder(r1 = (1.8 * scale),r2 = (2.5 * scale),h = (10 * scale), segments = 50))
+        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20,-20,0.8*4.5*size_multiplier[count]*scale])(cube(40 * scale)))
         positive = positive - negative
         place_sub += 1
-    atom_total = atom_total + translate([x_tot[count],y_tot[count],z_tot[count]])(positive)
-
+    atom_total = atom_total + translate([x_tot[count] + max(size_total),y_tot[count] + max(size_total),z_tot[count]])(positive)
+atom_total = atom_total + cube([x_tot[count] + (2 * max(size_total)),y_tot[count] + (2 * max(size_total)),0.3])
 scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print.scad')
 
-for i in range(0,place_sub):
-    x_value = (1 + (place_main // 6)) * 15 * scale
-    y_value = (place_main % 6) * 15 * scale
-    z_value = 4.5 * size_multiplier[place_main] * scale
+x_tot = []
+y_tot = []
+counter = 0
+for counter,any in enumerate(range(0,place_sub)):
+    x_value = (0 + (counter // 6)) * 10 * scale
+    y_value = (counter % 6) * 10 * scale
     x_tot.append(x_value)
     y_tot.append(y_value)
-    z_tot.append(z_value)
+
+print(x_tot)
+print(y_tot)
 
 counter = 0
 bond_total = 0
-for d_ in zip(d):
-    print(np.float64(d_)*12)
-    bond = 0
-    bond_num = 0
-    bond = rotate([0,90,0])(cylinder(r = (2.5),h = ((np.float64(d_)[0]*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]) * scale)), segments = 50))
-    bond += rotate([0,90,0])(translate([0,0,-2])(cylinder(r = 1.95,h = 4 + ((np.float64(d_)[0]*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]) * scale)),segments = 50)))
-    bond_total += translate([x_tot[counter],y_tot[counter],z_tot[counter]])(bond)
-    counter += 1
-
-
-
+for i_,j_,d_ in zip(i,j,d):
+    if i_ < j_:
+#       print(np.float64(d_)*12)
+        bond = 0
+        bond_num = 0
+        bond_len_base = ((np.float64(d_)*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]))) * scale
+        bond = rotate([0,0,0])(cylinder(r = (2.5 * scale),h = bond_len_base, segments = 50))
+        bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
+        bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
+        counter += 1
+bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
 scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print.scad' )
+
+subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print.scad'])
+subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print.scad'])
+
 #bond_num = rotate([0, 0, 0])(linear_extrude(15)(translate([0, 0, 0])(text(, size = 10))))
 #scad_render_to_file(bond_num,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_num_test.scad' )
