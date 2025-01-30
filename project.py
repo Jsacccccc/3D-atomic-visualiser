@@ -6,9 +6,7 @@ import numpy as np
 import math
 import ase.io
 import test as t
-from properties import bond_radii
-from properties import atom_size
-from properties import atom_colours
+from properties import *
 from ase.data import covalent_radii
 import subprocess
 import os
@@ -34,7 +32,7 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = databasemolecule()
+a = asemolecule()
 b = a.get_positions()
 #print(b)
 species_uniq = np.unique(a.get_chemical_symbols())
@@ -47,7 +45,7 @@ print(species_colour)
 for x,y in enumerate(range(0,len(size_multiplier))):
     if size_multiplier[x] > 2*scale:
         size_multiplier[x] = 2
-#size_multiplier = [(((atom_size[atom]-30/298-31)+150)*0.006*scale) for atom in species]
+
 
 #print(a)
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
