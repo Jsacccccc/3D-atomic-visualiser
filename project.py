@@ -11,6 +11,7 @@ from ase.data import covalent_radii
 import subprocess
 import os
 from datetime import datetime
+import user_input
 
 time_date = datetime.now()
 time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M")
@@ -35,7 +36,7 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = structure_from_file()
+a = user_input.a
 b = a.get_positions()
 
 species_uniq = np.unique(a.get_chemical_symbols())

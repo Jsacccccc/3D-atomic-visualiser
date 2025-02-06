@@ -5,12 +5,15 @@ from ase.neighborlist import neighbor_list
 import numpy as np
 import math
 import test as t
+import user_input
 from properties import *
 import subprocess
 import argparse
 from tqdm import tqdm
 import time
 from datetime import datetime
+import user_input
+
 
 # a contains the structure and b contains the positions of atoms in the structure
 a = []
@@ -38,7 +41,7 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = asemolecule()
+a = user_input.a
 b = a.get_positions()
 # species_uniq make a tuple of 1 instance of each type of atom
 species_uniq = np.unique(a.get_chemical_symbols())
