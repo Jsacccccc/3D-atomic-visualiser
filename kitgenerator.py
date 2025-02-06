@@ -8,12 +8,17 @@ import test as t
 from properties import *
 import subprocess
 import argparse
+from tqdm import tqdm
+import time
+from datetime import datetime
 
 # a contains the structure and b contains the positions of atoms in the structure
 a = []
 b = []
-scale = 0.5
-
+scale = 1.5
+time_date = datetime.now()
+time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M_")
+print(time_date)
 
 #these three definitions define the source used to generate structures.
 def asemolecule():
@@ -130,7 +135,8 @@ size_total = []
 
 # this is the loop that prints the spheres for the kit
 # this first loop runs for every atom in the structure
-print(atom_colour[mini_count])
+progress_bar = tqdm(total = len(atom_index), desc = "Atom rendering progress: ")
+
 for count,x in enumerate(atom_index):
     sphere_size = 4.5*size_multiplier[count]*scale
     size_total.append(sphere_size)
@@ -144,16 +150,22 @@ for count,x in enumerate(atom_index):
         positive = positive - negative
         place_sub += 1
     count_sub += 1
-    atom_total = atom_total + translate([x_tot[count_sub - 1] + max(size_total),y_tot[count_sub - 1] + max(size_total),z_tot[count]])(positive)
+    positive += sphere(sphere_size * 0.5, segments = 50)
+    atom_total += translate([x_tot[count_sub - 1] + max(size_total),y_tot[count_sub - 1] + max(size_total),z_tot[count]])(positive)
+    time.sleep(0.1)
+    progress_bar.update(1)
     if (count + 1) == atom_colour[mini_count]:
+
         atom_total = atom_total + cube([x_tot[count] + (2 * max(size_total)),y_tot[count] + (2 * max(size_total)),0.3])
-        scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(count) +'.scad')
+        atom_total = atom_total + translate([x_tot[count] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count] + (2 * max(size_total)) + 1.25,1.25,0.5])(linear_extrude(height = 1)(text(str(species[count_sub - 1]), 7.5)))
+        scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad')
         subprocess.run(['/usr/bin/openscad', '-o',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print.3mf',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print.scad'])
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
         mini_count += 1
         atom_total = 0
         count_sub = 0
+
 
 
 x_tot = []
@@ -170,6 +182,7 @@ print(y_tot)
 
 counter = 0
 bond_total = 0
+bond_progress = tqdm(total = (len(i)/2), desc = "Bond rendering progress: ")
 for i_,j_,d_ in zip(i,j,d):
     if i_ < j_:
 #       print(np.float64(d_)*12)
@@ -180,9 +193,10 @@ for i_,j_,d_ in zip(i,j,d):
         bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
         bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
         counter += 1
+        bond_progress.update(1)
 bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
-scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print.scad' )
-subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print.scad'])
+scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad' )
+subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
 
 #bond_num = rotate([0, 0, 0])(linear_extrude(15)(translate([0, 0, 0])(text(, size = 10))))
 #scad_render_to_file(bond_num,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_num_test.scad' )

@@ -10,13 +10,16 @@ from properties import *
 from ase.data import covalent_radii
 import subprocess
 import os
+from datetime import datetime
 
+time_date = datetime.now()
+time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M")
 
 a = []
 b = []
 scale = 1.0
 def asemolecule():
-    a = ase.build.molecule('CH3CH2OCH3')
+    a = ase.build.molecule('CH4')
     return a
 def databasemolecule():
     a = t.molecule
@@ -32,9 +35,9 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = asemolecule()
+a = structure_from_file()
 b = a.get_positions()
-#print(b)
+
 species_uniq = np.unique(a.get_chemical_symbols())
 species = a.get_chemical_symbols()
 cutoffs = {(str(s1), str(s2)): (bond_radii[s1] + bond_radii[s2]) * 1.2 for s1 in species_uniq for s2 in species_uniq}
@@ -91,7 +94,7 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 
 o.output(o.result())
 #model = import_scad("C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad")
-subprocess.run(["/home/isaac/Code/colorscad/colorscad.sh", "-i", "/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/project.3mf"])
+subprocess.run(["/home/isaac/Code/colorscad/colorscad.sh", "-i", "/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/single_body_export_files/single_body_model" + str(time_date) + ".3mf"])
 #subprocess.run(["/usr/bin/openscad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/project.3mf", "project.scad"])
 #os.chdir("C:\\Users\\Isaac\\Documents\\python\\working_example\\colorscad-0.5.2")
 #subprocess.call([".\\colorscad.sh", "-i", "C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad",
