@@ -5,27 +5,24 @@ from ase.neighborlist import neighbor_list
 import numpy as np
 import math
 import test as t
-import user_input
 from properties import *
 import subprocess
 import argparse
 from tqdm import tqdm
 import time
 from datetime import datetime
-import user_input
-
 
 # a contains the structure and b contains the positions of atoms in the structure
 a = []
 b = []
-scale = 1.5
+scale = 1.0
 time_date = datetime.now()
 time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M_")
 print(time_date)
 
 #these three definitions define the source used to generate structures.
 def asemolecule():
-    a = ase.build.molecule('CH3CH2OCH3')
+    a = ase.build.molecule('CH4')
     return a
 def databasemolecule():
     a = t.molecule
@@ -41,7 +38,10 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = user_input.a
+a = databasemolecule()
+# needed to sort atoms into groups of the same species, otherwise the kit tries to put different species of atoms together.
+a = a[a.numbers.argsort()]
+# b grabs the coordinates of every atom in the structure
 b = a.get_positions()
 # species_uniq make a tuple of 1 instance of each type of atom
 species_uniq = np.unique(a.get_chemical_symbols())
@@ -52,7 +52,8 @@ size_multiplier = [((atom_size[atom]/31)*0.6) for atom in species]
 species_colour = [atom_colours[atom] for atom in species]
 species_colour_uniq = [atom_colours[atom] for atom in species_uniq]
 species_colour_uniq.sort(reverse = False)
-
+print(species_colour)
+#neighbour list used to list all
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
 b *= 10*scale
 
@@ -73,6 +74,7 @@ z_rot_total = [0] * len(i)
 y_rot_total = [0] * len(i)
 i_total = [0] * len(i)
 j_total = [0] * len(i)
+print(i)
 for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 #    print(i_,j_,d_,D_,u_)
     z_rot()
@@ -84,8 +86,7 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 #    print(z_rot.angle)
 #    print(y_rot.angle)
     count += 1
-print(i_total)
-print(j_total)
+
 
 
 atom_index = []
@@ -95,6 +96,7 @@ z_tot = []
 place_main = 0
 place_sub = 0
 
+print(i_total)
 for place_main,x in enumerate(b):
     fresh = []
     atom_number = i_total.count(place_main)
@@ -114,17 +116,17 @@ for place_main,x in enumerate(b):
 atom_colour_temp = []
 atom_colour = []
 y = 0
-# this loop counts the number of atoms of each colour/species
+# this loop/section counts the number of atoms of each colour/species and first takes the number of each species then sorts them from most to least common and compounds them as this is needed for indexing while generating atoms.
 for x in species_colour_uniq:
     atom_colour_temp.append(species_colour.count(x))
-# they are then sorted from least to most common colour/species, as this is the order they are generated in
-atom_colour_temp.sort(reverse = False)
+atom_colour_temp.sort(reverse = True)
 temp = 0
 for y,z in enumerate(atom_colour_temp):
     temp += atom_colour_temp[y]
     atom_colour.append(temp)
 
 
+# this is ugly but all of these need to be set to zero before atoms can be generated.
 count = 0
 positive = 0
 negative = 0
@@ -139,7 +141,7 @@ size_total = []
 # this is the loop that prints the spheres for the kit
 # this first loop runs for every atom in the structure
 progress_bar = tqdm(total = len(atom_index), desc = "Atom rendering progress: ")
-
+print(y_tot)
 for count,x in enumerate(atom_index):
     sphere_size = 4.5*size_multiplier[count]*scale
     size_total.append(sphere_size)
@@ -159,18 +161,21 @@ for count,x in enumerate(atom_index):
     progress_bar.update(1)
     if (count + 1) == atom_colour[mini_count]:
 
-        atom_total = atom_total + cube([x_tot[count] + (2 * max(size_total)),y_tot[count] + (2 * max(size_total)),0.3])
-        atom_total = atom_total + translate([x_tot[count] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count] + (2 * max(size_total)) + 1.25,1.25,0.5])(linear_extrude(height = 1)(text(str(species[count_sub - 1]), 7.5)))
+        if count_sub >= 6:
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)), 75.0 + (2 * max(size_total)), 0.3])
+        else:
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.3])
+        atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0.5])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
         scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad')
-        subprocess.run(['/usr/bin/openscad', '-o',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
+#        subprocess.run(['/usr/bin/openscad', '-o',
+#                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
+#                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
         mini_count += 1
         atom_total = 0
         count_sub = 0
 
 
-
+# coordinate values need to be reset and recalculated for the bonds
 x_tot = []
 y_tot = []
 counter = 0
@@ -180,9 +185,8 @@ for counter,any in enumerate(range(0,place_sub)):
     x_tot.append(x_value)
     y_tot.append(y_value)
 
-print(x_tot)
-print(y_tot)
 
+# this loop generates the bonds and renders/exports them - i_,j_,d_ calculated again for simplicity sake rather than referencing them
 counter = 0
 bond_total = 0
 bond_progress = tqdm(total = (len(i)/2), desc = "Bond rendering progress: ")
@@ -199,7 +203,7 @@ for i_,j_,d_ in zip(i,j,d):
         bond_progress.update(1)
 bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
 scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad' )
-subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
+#subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
 
 #bond_num = rotate([0, 0, 0])(linear_extrude(15)(translate([0, 0, 0])(text(, size = 10))))
 #scad_render_to_file(bond_num,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_num_test.scad' )

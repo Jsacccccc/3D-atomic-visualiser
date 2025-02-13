@@ -1,4 +1,3 @@
-from solid import *
 import openscad as o
 import ase.build
 from ase.neighborlist import neighbor_list
@@ -7,11 +6,9 @@ import math
 import ase.io
 import test as t
 from properties import *
-from ase.data import covalent_radii
 import subprocess
-import os
 from datetime import datetime
-import user_input
+import json
 
 time_date = datetime.now()
 time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M")
@@ -36,9 +33,8 @@ def structure_from_file():
     a.set_pbc(False)
     return a
 
-a = user_input.a
+a = databasemolecule()
 b = a.get_positions()
-
 species_uniq = np.unique(a.get_chemical_symbols())
 species = a.get_chemical_symbols()
 cutoffs = {(str(s1), str(s2)): (bond_radii[s1] + bond_radii[s2]) * 1.2 for s1 in species_uniq for s2 in species_uniq}
@@ -59,10 +55,10 @@ b *= 10*scale
 count = 0
 for x in b:
     o.colour_sphere(species_colour[count],(4.5*size_multiplier[count]*scale))
+    print(4.5*size_multiplier[count]*scale)
     count += 1
 # the * before x means it is iterative and uses the x,y and z coordinates in x iteratively
     o.translate(*x*scale)
-    print(x)
 
 #cylindrical coordinates, make sure x is zero
 #z rotate begins in x axis
