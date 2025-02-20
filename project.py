@@ -1,10 +1,8 @@
 import openscad as o
-import ase.build
 from ase.neighborlist import neighbor_list
 import numpy as np
 import math
 import ase.io
-import test as t
 from properties import *
 import subprocess
 from datetime import datetime
@@ -30,25 +28,10 @@ output_filename = args.output
 scale = float(args.scale)
 cutoff = float(args.cutoff)
 
-#scale = 1.0
-#def asemolecule():
-#    a = ase.build.molecule('CH4')
-#    return a
-#def databasemolecule():
-#    a = t.molecule
-#    return a
-#def bulkgen():
-#    a = ase.build.bulk("C",cubic = True)
-#    a*=(2,2,2)
-#    a.set_pbc(False)
-#   si.write("C:\\Users\\Isaac\\Documents\\Si.xyz")
-#    return a
-#def structure_from_file():
-#    a = t.real_molecule
-#    a.set_pbc(False)
-#    return a
-molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+ str(input_filename) +".xyz")
+#molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+ str(input_filename) +".xyz")
+molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/Slab_with_dislocation_for3Dprint.xyz")
 a = molecule
+a.set_pbc(False)
 b = a.get_positions()
 species_uniq = np.unique(a.get_chemical_symbols())
 species = a.get_chemical_symbols()
@@ -62,11 +45,9 @@ for x,y in enumerate(range(0,len(size_multiplier))):
         size_multiplier[x] = 2
 
 
-#print(a)
+
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
-#print(i,j,d,D)
 b *= 10*scale
-#print(len(b))
 count = 0
 for x in b:
     o.colour_sphere(species_colour[count],(4.5*size_multiplier[count]))
@@ -97,7 +78,6 @@ counter = 0
 for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
     if i_ < j_:
         print(i_, j_, d_, D_, u_)
-#        o.cylinder((5 * scale), d_ * 10 * (1.2 * scale))
         o.colour_cylinder("grey", (5 * scale), (d_ * 10 * (1.2 * scale)))
         z_rot()
         y_rot()
@@ -105,9 +85,5 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
         o.translate(*b[i_])
 
 o.output(o.result())
-#model = import_scad("C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad")
+# this subprocess runs a command line command which renders the scad file generated in this script to be exported to a 3mf file.
 subprocess.run(["/home/isaac/Code/colorscad/colorscad.sh", "-i", "/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/single_body_export_files/" + str(output_filename) + str(time_date) + ".3mf"])
-#subprocess.run(["/usr/bin/openscad", "-o", "/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/project.3mf", "project.scad"])
-#os.chdir("C:\\Users\\Isaac\\Documents\\python\\working_example\\colorscad-0.5.2")
-#subprocess.call([".\\colorscad.sh", "-i", "C:\\Users\\Isaac\\Documents\\python\\working_example\\project.scad",
-#                 "-o", "C:\\Users\\Isaac\\Documents\\python\\working_example\\exported models\\colortest.3mf"], shell=True)

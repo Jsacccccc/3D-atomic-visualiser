@@ -34,7 +34,6 @@ print(time_date)
 # reads the user's file and assigns the molecule to a
 molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+ str(input_filename) +".xyz")
 a = molecule
-
 # needed to sort atoms into groups of the same species, otherwise the kit tries to put different species of atoms together.
 a = a[a.numbers.argsort()]
 # b grabs the coordinates of every atom in the structure
@@ -114,16 +113,15 @@ y = 0
 sub_loop = 0
 # this loop/section counts the number of atoms of each colour/species and first takes the number of each species then sorts them from most to least common and compounds them as this is needed for indexing while generating atoms.
 atom_colour_temp[len(species_colour_uniq) - 1] = species_colour[len(species_colour_uniq) - 1].count(species_colour[len(species_colour_uniq) - 1])
-#print(atom_colour_temp)
+
 for x in range(1,len(species)):
     print(atom_colour_temp)
     atom_colour_temp[sub_loop] += 1
     if species_colour[x] != species_colour[x - 1]:
         sub_loop += 1
 #extra addition needed to the last one because the range starts at 1 so it misses the last element out
-#atom_colour_temp[sub_loop] += 1
-print(atom_colour_temp)
-#atom_colour_temp.sort(reverse = True)
+
+# this goes through atom_colour_temp and adds all of the previous values to the current one, so the final element is equal to the number of atoms.
 temp = 0
 for y,z in enumerate(atom_colour_temp):
     temp += atom_colour_temp[y]
@@ -160,6 +158,7 @@ for count,x in enumerate(atom_index):
         positive = positive - negative
         place_sub += 1
     count_sub += 1
+    positive += rotate([0,0,90])(translate([-5 * scale,-5 * scale,- z_tot[count]])(linear_extrude(height = 1)(text(size = 3, text = str(count)))))
     atom_total += translate([x_tot[count_sub - 1] + max(size_total),y_tot[count_sub - 1] + max(size_total),z_tot[count]])(positive)
     time.sleep(0.1)
     progress_bar.update(1)
@@ -170,11 +169,11 @@ for count,x in enumerate(atom_index):
             atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)), (75.0 * scale) + (2 * max(size_total)), 0.3])
         else:
             atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.3])
-        atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0.5])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
+        atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
         scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad')
-#        subprocess.run(['/usr/bin/openscad', '-o',
-#                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
-#                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
+        subprocess.run(['/usr/bin/openscad', '-o',
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
         mini_count += 1
         atom_total = 0
         count_sub = 0
@@ -195,21 +194,29 @@ for counter,any in enumerate(range(0,place_sub)):
 counter = 0
 bond_total = 0
 bond_progress = tqdm(total = (len(i)/2), desc = "Bond rendering progress: ")
+# i lists the number of an atom once for every bond it has, e.g carbons show up as 4 of their index number
+
 for i_,j_,d_ in zip(i,j,d):
     if i_ < j_:
+        print(species[i_],species[j_])
 #       print(np.float64(d_)*12)
         bond = 0
         bond_num = 0
         bond_len_base = ((np.float64(d_)*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]))) * scale
         bond = rotate([0,0,0])(cylinder(r = (2.5 * scale),h = bond_len_base, segments = 50))
+#       bond += rotate([90,0,90])(translate([-5,y_tot[counter],x_tot[counter]/2])(text(size = scale * 5, text = str(i_))))
 # pin on bond is translated by -2*scale meaning that it gives the joint a unit length of 2
         bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
+        bond += rotate([0, 0, 90])(translate([-2, -6 * scale, 0.5 - (2 * scale)])(linear_extrude(height = 1)(size=2.5, text=str(i_)+"-"+str(j_))))
         bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
         counter += 1
         bond_progress.update(1)
-bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
+if counter >= 6:
+    bond_total += cube([x_tot[counter - 1] + (10 * scale), (60.0 * scale) + (5 * scale), 0.3])
+else:
+    bond_total += cube([x_tot[counter - 1] + (10 * scale),y_tot[counter] + (5 * scale),0.3])
+#bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
 scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad' )
-#subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
+subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
 
-#bond_num = rotate([0, 0, 0])(linear_extrude(15)(translate([0, 0, 0])(text(, size = 10))))
-#scad_render_to_file(bond_num,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_num_test.scad' )
+
