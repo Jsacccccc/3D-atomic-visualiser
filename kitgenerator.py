@@ -32,7 +32,8 @@ time_date = time_date.strftime("_" + "%Y_" + "%m_" + "%d_" + "%H_" + "%M_")
 print(time_date)
 
 # reads the user's file and assigns the molecule to a
-molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+ str(input_filename) +".xyz")
+molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/"+ str(input_filename))
+#molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+"d"+str(input_filename)+".xyz")
 a = molecule
 # needed to sort atoms into groups of the same species, otherwise the kit tries to put different species of atoms together.
 a = a[a.numbers.argsort()]
@@ -153,12 +154,13 @@ for count,x in enumerate(atom_index):
     for y in atom_index[count]:
 # 'negative' is the material being removed from each atom where 'positive' is the atom
 # joint slot is recessed by 2.1*scale into the atom since the pin on the bond is 2*scale units and there needs to be some leeway for it to fit into.
-        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([0,0,(0.8*4.5*size_multiplier[count]*scale)-(2.1*scale)])(cylinder(r1 = (1.8 * scale),r2 = (2.5 * scale),h = (10 * scale), segments = 50)))
+# multiplied by 0.8 since that is where the flat surface formed by the sphere is - specifically recessed from that rather than the radius of the atom as calculated above
+        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([0,0,(0.8*4.5*size_multiplier[count]*scale)-(2.1*scale)])(cylinder(r1 = (2.3 * scale),r2 = (2.5 * scale),h = (2.11 * scale), segments = 50)))
         negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20*scale,-20*scale,0.8*4.5*size_multiplier[count]*scale])(cube(40 * scale)))
         positive = positive - negative
         place_sub += 1
     count_sub += 1
-    positive += rotate([0,0,90])(translate([-5 * scale,-5 * scale,- z_tot[count]])(linear_extrude(height = 1)(text(size = 3, text = str(count)))))
+    positive += rotate([0,0,90])(translate([-5 * scale,-5 * scale,- z_tot[count]])(linear_extrude(height = 1)(text(size = 5, text = str(count)))))
     atom_total += translate([x_tot[count_sub - 1] + max(size_total),y_tot[count_sub - 1] + max(size_total),z_tot[count]])(positive)
     time.sleep(0.1)
     progress_bar.update(1)
@@ -166,9 +168,9 @@ for count,x in enumerate(atom_index):
         print(mini_count)
         print(count_sub)
         if count_sub >= 6:
-            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)), (75.0 * scale) + (2 * max(size_total)), 0.3])
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)), (75.0 * scale) + (2 * max(size_total)), 0.2])
         else:
-            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.3])
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.2])
         atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
         scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad')
         subprocess.run(['/usr/bin/openscad', '-o',
@@ -207,7 +209,7 @@ for i_,j_,d_ in zip(i,j,d):
 #       bond += rotate([90,0,90])(translate([-5,y_tot[counter],x_tot[counter]/2])(text(size = scale * 5, text = str(i_))))
 # pin on bond is translated by -2*scale meaning that it gives the joint a unit length of 2
         bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
-        bond += rotate([0, 0, 90])(translate([-2, -6 * scale, 0.5 - (2 * scale)])(linear_extrude(height = 1)(size=2.5, text=str(i_)+"-"+str(j_))))
+        bond += rotate([0, 0, 90])(translate([-2, -6 * scale, 0 - (2 * scale)])(linear_extrude(height = 1)(text(size=5, text=str(i_)+"-"+str(j_)))))
         bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
         counter += 1
         bond_progress.update(1)
