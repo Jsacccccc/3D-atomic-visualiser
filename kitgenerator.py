@@ -52,6 +52,7 @@ species_colour_uniq.sort(reverse = False)
 #neighbour list used to list all
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
 b *= 10*scale
+subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)])
 
 def z_rot():
     z_rot.rho = math.sqrt(u_[0] ** 2 + u_[1] ** 2)
@@ -172,10 +173,10 @@ for count,x in enumerate(atom_index):
         else:
             atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.2])
         atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
-        scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad')
+        scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + '_' + '.scad')
         subprocess.run(['/usr/bin/openscad', '-o',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/atoms_to_print'+ str(time_date) + str(mini_count) + "_" +'.3mf',
-                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + "_" + '.scad'])
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)+'/'+'atoms_to_print'+ str(time_date) + str(mini_count) + '_' +'.3mf',
+                        '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + '_' + '.scad'])
         mini_count += 1
         atom_total = 0
         count_sub = 0
@@ -219,6 +220,6 @@ else:
     bond_total += cube([x_tot[counter - 1] + (10 * scale),y_tot[counter] + (5 * scale),0.3])
 #bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
 scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad' )
-subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
+subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)+'/'+'bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
 
 
