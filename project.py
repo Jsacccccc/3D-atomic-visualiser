@@ -29,10 +29,10 @@ output_filename = args.output
 scale = float(args.scale)
 cutoff = float(args.cutoff)
 
-#molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/"+ str(input_filename))
+molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/"+ str(input_filename))
 #molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+"d"+str(input_filename)+".xyz")
 #molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/Slab_with_dislocation_for3Dprint.xyz")
-molecule = ase.build.molecule("CH3COOH")
+
 a = molecule
 a.set_pbc(False)
 b = a.get_positions()
