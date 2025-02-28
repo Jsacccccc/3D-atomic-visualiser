@@ -3,6 +3,7 @@ from ase.neighborlist import neighbor_list
 import numpy as np
 import math
 import ase.io
+import ase.build
 from properties import *
 import subprocess
 from datetime import datetime
@@ -29,8 +30,9 @@ scale = float(args.scale)
 cutoff = float(args.cutoff)
 
 #molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/"+ str(input_filename))
-molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+"d"+str(input_filename)+".xyz")
+#molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+"d"+str(input_filename)+".xyz")
 #molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/Slab_with_dislocation_for3Dprint.xyz")
+molecule = ase.build.molecule("CH3COOH")
 a = molecule
 a.set_pbc(False)
 b = a.get_positions()
@@ -40,25 +42,26 @@ cutoffs = {(str(s1), str(s2)): (bond_radii[s1] + bond_radii[s2]) * cutoff for s1
 size_multiplier = [((atom_size[atom]/31)*0.6*scale) for atom in species]
 species_colour = [atom_colours[atom] for atom in species]
 subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/'+'printing_files_' + str(output_filename) + str(time_date)])
-print(species_colour)
+#print(species_colour)
 
 for x,y in enumerate(range(0,len(size_multiplier))):
     if size_multiplier[x] > 2*scale:
-        size_multiplier[x] = 2
+        size_multiplier[x] = 2*scale
 
 
 
 i, j, d, D = neighbor_list('ijdD', a, cutoffs)
+print(i)
+print(j)
 b *= 10*scale
 count = 0
-for x in b:
+for count,x in enumerate(b):
     o.colour_sphere(species_colour[count],(4.5*size_multiplier[count]))
-    print(4.5*size_multiplier[count])
-    count += 1
+#    print(4.5*size_multiplier[count])
 # the * before x means it is iterative and uses the x,y and z coordinates in x iteratively
     o.translate(*x)
 
-#cylindrical coordinates, make sure x is zero
+#spherical coordinates, make sure x is zero
 #z rotate begins in x axis
 
 
@@ -88,4 +91,4 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 
 o.output(o.result())
 # this subprocess runs a command line command which renders the scad file generated in this script to be exported to a 3mf file.
-subprocess.run(['/home/isaac/Code/colorscad/colorscad.sh', '-i', '/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/' + 'printing_files_' + str(output_filename)+str(time_date) + '/' + str(output_filename) + str(time_date) + ".3mf"])
+#subprocess.run(['/home/isaac/Code/colorscad/colorscad.sh', '-i', '/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/' + 'printing_files_' + str(output_filename)+str(time_date) + '/' + str(output_filename) + str(time_date) + ".3mf"])

@@ -156,7 +156,7 @@ for count,x in enumerate(atom_index):
 # 'negative' is the material being removed from each atom where 'positive' is the atom
 # joint slot is recessed by 2.1*scale into the atom since the pin on the bond is 2*scale units and there needs to be some leeway for it to fit into.
 # multiplied by 0.8 since that is where the flat surface formed by the sphere is - specifically recessed from that rather than the radius of the atom as calculated above
-        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([0,0,(0.8*4.5*size_multiplier[count]*scale)-(2.1*scale)])(cylinder(r1 = (2.3 * scale),r2 = (2.5 * scale),h = (2.11 * scale), segments = 50)))
+        negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([0,0,(0.8*4.5*size_multiplier[count]*scale)-(2.1*scale)])(cylinder(r1 = (2.6 * scale),r2 = (2.5 * scale),h = (2.11 * scale), segments = 50)))
         negative += rotate([0, y_rot_total[place_sub], z_rot_total[place_sub]])(translate([-20*scale,-20*scale,0.8*4.5*size_multiplier[count]*scale])(cube(40 * scale)))
         positive = positive - negative
         place_sub += 1
@@ -206,10 +206,11 @@ for i_,j_,d_ in zip(i,j,d):
         bond = 0
         bond_num = 0
         bond_len_base = ((np.float64(d_)*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]))) * scale
-        bond = rotate([0,0,0])(cylinder(r = (2.5 * scale),h = bond_len_base, segments = 50))
+        bond = rotate([0,0,0])(cylinder(r = (3 * scale),h = bond_len_base, segments = 50))
 #       bond += rotate([90,0,90])(translate([-5,y_tot[counter],x_tot[counter]/2])(text(size = scale * 5, text = str(i_))))
 # pin on bond is translated by -2*scale meaning that it gives the joint a unit length of 2
-        bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
+        bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2.5 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
+        bond += rotate([0, 0, 0])(translate([0, 0, (1.7 * scale) + bond_len_base])(cylinder(r=(2.6 * scale), h=(0.3 * scale), segments=50)))
         bond += rotate([0, 0, 90])(translate([-2, -6 * scale, 0 - (2 * scale)])(linear_extrude(height = 1)(text(size=5, text=str(i_)+"-"+str(j_)))))
         bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
         counter += 1
