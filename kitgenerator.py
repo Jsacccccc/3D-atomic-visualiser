@@ -1,10 +1,8 @@
 from solid import *
-import openscad as o
 import ase.build
 from ase.neighborlist import neighbor_list
 import numpy as np
 import math
-import test as t
 from properties import *
 import subprocess
 import argparse
@@ -33,6 +31,7 @@ print(time_date)
 
 # reads the user's file and assigns the molecule to a
 molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/real_test_files_xyz/"+ str(input_filename))
+# input below used for testing by reading database of random isomers
 #molecule = ase.io.read(r"/home/isaac/PycharmProjects/3D-atomic-visualiser/clean_XYZs/"+"d"+str(input_filename)+".xyz")
 a = molecule
 # needed to sort atoms into groups of the same species, otherwise the kit tries to put different species of atoms together.

@@ -41,7 +41,7 @@ species = a.get_chemical_symbols()
 cutoffs = {(str(s1), str(s2)): (bond_radii[s1] + bond_radii[s2]) * cutoff for s1 in species_uniq for s2 in species_uniq}
 size_multiplier = [((atom_size[atom]/31)*0.6*scale) for atom in species]
 species_colour = [atom_colours[atom] for atom in species]
-subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/'+'printing_files_' + str(output_filename) + str(time_date)])
+subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/' + str(output_filename) + str(time_date)])
 #print(species_colour)
 
 for x,y in enumerate(range(0,len(size_multiplier))):
@@ -91,4 +91,4 @@ for i_, j_, d_, D_, u_ in zip(i, j, d, D, u):
 
 o.output(o.result())
 # this subprocess runs a command line command which renders the scad file generated in this script to be exported to a 3mf file.
-#subprocess.run(['/home/isaac/Code/colorscad/colorscad.sh', '-i', '/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/' + 'printing_files_' + str(output_filename)+str(time_date) + '/' + str(output_filename) + str(time_date) + ".3mf"])
+subprocess.run(['/home/isaac/Code/colorscad/colorscad.sh', '-i', '/home/isaac/PycharmProjects/3D-atomic-visualiser/project.scad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/unibody_export_files/' + str(output_filename)+str(time_date) + '/' + str(output_filename) + str(time_date) + ".3mf"])

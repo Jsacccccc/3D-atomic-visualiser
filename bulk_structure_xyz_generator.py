@@ -1,6 +1,6 @@
 import ase.build
 
-bulk_species = "Al"
+bulk_species = "Hg"
 
 a = ase.build.bulk(str(bulk_species), cubic=True)
 a *= (2,2,2)
