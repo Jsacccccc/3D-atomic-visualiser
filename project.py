@@ -45,8 +45,8 @@ subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export
 #print(species_colour)
 
 for x,y in enumerate(range(0,len(size_multiplier))):
-    if size_multiplier[x] > 2*scale:
-        size_multiplier[x] = 2*scale
+    if size_multiplier[x] > 2 * scale:
+        size_multiplier[x] = 2 * scale
 
 
 

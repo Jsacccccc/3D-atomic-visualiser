@@ -53,6 +53,11 @@ i, j, d, D = neighbor_list('ijdD', a, cutoffs)
 b *= 10*scale
 subprocess.run(['mkdir','/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)])
 
+# below limits the maximum size of atoms
+for x,y in enumerate(range(0,len(size_multiplier))):
+    if size_multiplier[x] > 2:
+        size_multiplier[x] = 2
+
 def z_rot():
     z_rot.rho = math.sqrt(u_[0] ** 2 + u_[1] ** 2)
     z_rot.angle = math.atan2(u_[1], u_[0]) * (180 / math.pi)
@@ -99,7 +104,7 @@ for place_main,x in enumerate(b):
         fresh.append(j_total[place_sub])
         place_sub += 1
     atom_index.append(fresh)
-    x_value = ((place_main // 6)) * 15 * scale
+    x_value = ((place_main // 6)) * ((2 * 9 * scale) + 5)
     y_value = (place_main % 6) * 15 * scale
     z_value = 4.5 * size_multiplier[place_main] * scale
     x_tot.append(x_value)
@@ -160,7 +165,9 @@ for count,x in enumerate(atom_index):
         positive = positive - negative
         place_sub += 1
     count_sub += 1
-    positive += rotate([0,0,90])(translate([-5 * scale,-5 * scale,- z_tot[count]])(linear_extrude(height = 1)(text(size = 5, text = str(count)))))
+# below adds text to the baseplate to identify the atom
+    positive += rotate([0,0,90])(translate([-max(size_total),-max(size_total) -5 ,- z_tot[count]])(linear_extrude(height = 1)(text(size = 5, text = str(count)))))
+# below translates the atom itself
     atom_total += translate([x_tot[count_sub - 1] + max(size_total),y_tot[count_sub - 1] + max(size_total),z_tot[count]])(positive)
     time.sleep(0.1)
     progress_bar.update(1)
@@ -168,10 +175,10 @@ for count,x in enumerate(atom_index):
         print(mini_count)
         print(count_sub)
         if count_sub >= 6:
-            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)), (75.0 * scale) + (2 * max(size_total)), 0.2])
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)) + 5, (80.0 * scale) + (2 * max(size_total)), 0.2])
         else:
-            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)),y_tot[count_sub - 1] + (2 * max(size_total)),0.2])
-        atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)),0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 1.25,1.25,0])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
+            atom_total = atom_total + cube([x_tot[count_sub - 1] + (2 * max(size_total)) + 5,y_tot[count_sub - 1] + (2 * max(size_total)),0.2])
+        atom_total = atom_total + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 5,0,0])(cube([10,10,0.3])) + translate([x_tot[count_sub - 1] + (2 * max(size_total)) + 5 + 1.25,1.25,0])(linear_extrude(height = 1)(text(str(species[count]), 7.5)))
         scad_render_to_file(atom_total, '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/atoms_to_print'+ str(time_date) + str(mini_count) + '_' + '.scad')
         subprocess.run(['/usr/bin/openscad', '-o',
                         '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)+'/'+'atoms_to_print'+ str(time_date) + str(mini_count) + '_' +'.3mf',
@@ -186,8 +193,8 @@ x_tot = []
 y_tot = []
 counter = 0
 for counter,any in enumerate(range(0,place_sub)):
-    x_value = (0 + (counter // 6)) * 10 * scale
-    y_value = (counter % 6) * 10 * scale
+    x_value = (counter // 6) * ((6*scale)+5+1)
+    y_value = (counter % 6) * (20)
     x_tot.append(x_value)
     y_tot.append(y_value)
 
@@ -205,19 +212,25 @@ for i_,j_,d_ in zip(i,j,d):
         bond = 0
         bond_num = 0
         bond_len_base = ((np.float64(d_)*12)-(0.85 * 4.5 * (size_multiplier[i_] + size_multiplier[j_]))) * scale
+# below generates centre of bond
         bond = rotate([0,0,0])(cylinder(r = (3 * scale),h = bond_len_base, segments = 50))
 #       bond += rotate([90,0,90])(translate([-5,y_tot[counter],x_tot[counter]/2])(text(size = scale * 5, text = str(i_))))
 # pin on bond is translated by -2*scale meaning that it gives the joint a unit length of 2
         bond += rotate([0,0,0])(translate([0,0,(-2 * scale)])(cylinder(r = (2.5 * scale) - 0.03,h = ((4 * scale) + bond_len_base),segments = 50)))
+# below adds lip on top edge of bond to make it click into slot
         bond += rotate([0, 0, 0])(translate([0, 0, (1.7 * scale) + bond_len_base])(cylinder(r=(2.6 * scale), h=(0.3 * scale), segments=50)))
-        bond += rotate([0, 0, 90])(translate([-2, -6 * scale, 0 - (2 * scale)])(linear_extrude(height = 1)(text(size=5, text=str(i_)+"-"+str(j_)))))
-        bond_total += translate([x_tot[counter] + (2.5 * scale),y_tot[counter] + (2.5 * scale),(2 * scale)])(bond)
+# below adds text on baseplate
+        bond += rotate([0, 0, 90])(translate([-3*scale, -3*scale - 5,  - 2])(linear_extrude(height = 1)(text(size=5, text=str(i_)+"-"+str(j_)))))
+#        bond += rotate([0, 0, 90])(translate([-2, -6 * scale,  - (2 * scale)])(linear_extrude(height = 1)(text(size=5, text=str(i_)+"-"+str(j_)))))
+# below translates the whole thing to the right place
+        bond_total += translate([x_tot[counter] + (3 * scale),y_tot[counter] + (3 * scale),(2 * scale)])(bond)
         counter += 1
         bond_progress.update(1)
 if counter >= 6:
-    bond_total += cube([x_tot[counter - 1] + (10 * scale), (60.0 * scale) + (5 * scale), 0.3])
+    bond_total += cube([x_tot[counter - 1] + (6 * scale) + 5, (120.0), 0.3])
+#    bond_total += cube([x_tot[counter - 1] + (10 * scale), (60.0 * scale) + (5 * scale), 0.3])
 else:
-    bond_total += cube([x_tot[counter - 1] + (10 * scale),y_tot[counter] + (5 * scale),0.3])
+    bond_total += cube([x_tot[counter - 1] + (6 * scale) + 5, y_tot[counter], 0.3])
 #bond_total += cube([x_tot[counter] + (5 * scale), y_tot[counter] + (5 * scale),0.3])
 scad_render_to_file(bond_total,'/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad' )
 subprocess.run(['/usr/bin/openscad', '-o', '/home/isaac/PycharmProjects/3D-atomic-visualiser/export_models/kit_export_models/'+'printing_files_'+str(input_filename)+str(time_date)+'/'+'bonds_to_print'+ str(time_date) +'.3mf', '/home/isaac/PycharmProjects/3D-atomic-visualiser/scad_files/bonds_to_print'+ str(time_date) +'.scad'])
